@@ -14,10 +14,11 @@ mkdir -p xnat-data/cache
 mkdir -p xnat-data/configs
 mkdir -p postgres/data
 mkdir -p postgres/run
+mkdir -p postgres/config
 
 singularity instance start -f -e --no-home --writable \
--B postgres/data:/var/lib/postgresql/data \
--B postgres/run:/var/lib/postgresql/run \
+-B postgres/data:/var/lib/postgresql/13/main \
+-B postgres/config:/etc/postgresql/13/main \
 -B xnat/plugins:/data/xnat/home/plugins \
 -B xnat-data/home/logs:/data/xnat/home/logs \
 -B xnat-data/archive:/data/xnat/archive \

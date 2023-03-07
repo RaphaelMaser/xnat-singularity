@@ -5,31 +5,25 @@ From: tomcat:9-jdk8-openjdk-bullseye
     export XNAT_VERSION=1.8.6.1
     export XNAT_MIN_HEAP=256m
     export XNAT_MAX_HEAP=4g
-    # export XNAT_SMTP_ENABLED=false
-    # export XNAT_SMTP_HOSTNAME=fake.fake
-    # export XNAT_SMTP_PORT=
-    # export XNAT_SMTP_AUTH=
-    # export XNAT_SMTP_USERNAME=
-    # export XNAT_SMTP_PASSWORD=
-    export XNAT_DATASOURCE_ADMIN_PASSWORD=xnat123456789abcdef0
-    export XNAT_DATASOURCE_DRIVER=org.postgresql.Driver
-    export XNAT_DATASOURCE_NAME=xnat
-    export XNAT_DATASOURCE_USERNAME=xnat
-    export XNAT_DATASOURCE_PASSWORD=xnat
-    export XNAT_DATASOURCE_URL=jdbc:postgresql://xnat-db/xnat
-    export XNAT_ACTIVEMQ_URL=tcp://xnat-activemq:61616
-    export XNAT_ACTIVEMQ_USERNAME=write
-    export XNAT_ACTIVEMQ_PASSWORD=password
-    export TOMCAT_XNAT_FOLDER=ROOT
+    # export XNAT_DATASOURCE_ADMIN_PASSWORD=xnat123456789abcdef0
+    # export XNAT_DATASOURCE_DRIVER=org.postgresql.Driver
+    # export XNAT_DATASOURCE_NAME=xnat
+    # export XNAT_DATASOURCE_USERNAME=xnat
+    # export XNAT_DATASOURCE_PASSWORD=xnat
+    # export XNAT_DATASOURCE_URL=jdbc:postgresql://xnat-db/xnat
+    # export XNAT_ACTIVEMQ_URL=tcp://xnat-activemq:61616
+    # export XNAT_ACTIVEMQ_USERNAME=write
+    # export XNAT_ACTIVEMQ_PASSWORD=password
+    # export TOMCAT_XNAT_FOLDER=ROOT
     export XNAT_ROOT=/data/xnat
     export XNAT_HOME=/data/xnat/home
     export CATALINA_OPTS="-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}"
-    export XNAT_EMAIL=harmitage@miskatonic.edu
+    # export XNAT_EMAIL=harmitage@miskatonic.edu
     export LC_ALL=C
+    # export PGDATA=/var/lib/postgresql/13/main
 
 
 %files
-    #xnat/make-xnat-config_copy.sh /usr/local/bin/make-xnat-config.sh
     xnat-web-1.8.6.1.war /usr/local/tomcat/webapps/xnat-web-1.8.6.1.war
     xnat/xnat-conf.properties /data/xnat/home/config/xnat-conf.properties
 
@@ -64,11 +58,12 @@ From: tomcat:9-jdk8-openjdk-bullseye
     #/usr/local/bin/make-xnat-config.sh
     #rm /usr/local/bin/make-xnat-config.sh
 
-    #wget --no-verbose --output-document=$TOMCAT_XNAT_FOLDER_PATH/xnat-web-${XNAT_VERSION}.war https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-${XNAT_VERSION}.war
+    wget --no-verbose --output-document=$TOMCAT_XNAT_FOLDER_PATH/xnat-web-${XNAT_VERSION}.war https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-${XNAT_VERSION}.war
     unzip -q -o -d /$TOMCAT_XNAT_FOLDER_PATH/ROOT /$TOMCAT_XNAT_FOLDER_PATH/xnat-web-1.8.6.1.war
-    rm -f /$TOMCAT_XNAT_FOLDER_PATH/xnat-web-1.8.6.1.war
+    rm -f /$TOMCAT_XNAT_FOLDER_PATH/xnat-web-${XNAT_VERSION}.war
 
 %runscript
+    # Setting owner and rights
     chown -R postgres:postgres /var/lib/postgresql
     chown -R postgres:postgres /var/run/postgresql
     chown -R postgres:postgres /var/log/postgresql
@@ -76,8 +71,17 @@ From: tomcat:9-jdk8-openjdk-bullseye
     chmod -R 700 /etc/ssl/private
     usermod -a -G root postgres
 
+    pg_createcluster -d /var/lib/postgresql/13/main 13 main
+
+    # Creating postgresql
+    service postgresql start
+    su - postgres -c "createuser -D xnat"
+    su - postgres -c "createdb -O xnat xnat"
+    su - postgres -c "psql -c \"ALTER USER xnat WITH PASSWORD 'xnat'\""
+
+    
     echo "\nStarting Postgres:"
-    su postgres /etc/init.d/postgresql start
+    #su postgres /etc/init.d/postgresql start
     service --status-all
 
     echo "\nStarting Tomcat+XNAT:"
@@ -92,8 +96,7 @@ From: tomcat:9-jdk8-openjdk-bullseye
     chmod -R 700 /etc/ssl/private
     usermod -a -G root postgres
 
-    pg_dropcluster --stop 13 main
-    pg_createcluster -d /var/lib/postgresql/data 13 main
+    pg_createcluster -d /var/lib/postgresql/13/main 13 main
 
     # Creating postgresql
     service postgresql start
@@ -101,7 +104,7 @@ From: tomcat:9-jdk8-openjdk-bullseye
     su - postgres -c "createdb -O xnat xnat"
     su - postgres -c "psql -c \"ALTER USER xnat WITH PASSWORD 'xnat'\""
 
-    # 
+    
     echo "\nStarting Postgres:"
     #su postgres /etc/init.d/postgresql start
     service --status-all
