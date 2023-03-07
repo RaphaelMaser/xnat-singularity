@@ -2,29 +2,18 @@ Bootstrap: docker
 From: tomcat:9-jdk8-openjdk-bullseye
 
 %environment
+
     export XNAT_VERSION=1.8.6.1
     export XNAT_MIN_HEAP=256m
     export XNAT_MAX_HEAP=4g
-    # export XNAT_DATASOURCE_ADMIN_PASSWORD=xnat123456789abcdef0
-    # export XNAT_DATASOURCE_DRIVER=org.postgresql.Driver
-    # export XNAT_DATASOURCE_NAME=xnat
-    # export XNAT_DATASOURCE_USERNAME=xnat
-    # export XNAT_DATASOURCE_PASSWORD=xnat
-    # export XNAT_DATASOURCE_URL=jdbc:postgresql://xnat-db/xnat
-    # export XNAT_ACTIVEMQ_URL=tcp://xnat-activemq:61616
-    # export XNAT_ACTIVEMQ_USERNAME=write
-    # export XNAT_ACTIVEMQ_PASSWORD=password
-    # export TOMCAT_XNAT_FOLDER=ROOT
     export XNAT_ROOT=/data/xnat
     export XNAT_HOME=/data/xnat/home
     export CATALINA_OPTS="-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}"
-    # export XNAT_EMAIL=harmitage@miskatonic.edu
     export LC_ALL=C
-    # export PGDATA=/var/lib/postgresql/13/main
 
 
 %files
-    # xnat-web-1.8.6.1.war /usr/local/tomcat/webapps/xnat-web-1.8.6.1.war
+
     xnat/xnat-conf.properties /data/xnat/home/config/xnat-conf.properties
 
 %post    
@@ -54,15 +43,12 @@ From: tomcat:9-jdk8-openjdk-bullseye
         /var/lib/postgresql/run
      
     # Install xnat
-
-    #/usr/local/bin/make-xnat-config.sh
-    #rm /usr/local/bin/make-xnat-config.sh
-
     wget --no-verbose --output-document=$TOMCAT_XNAT_FOLDER_PATH/xnat-web-${XNAT_VERSION}.war https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-${XNAT_VERSION}.war
     unzip -q -o -d /$TOMCAT_XNAT_FOLDER_PATH/ROOT /$TOMCAT_XNAT_FOLDER_PATH/xnat-web-1.8.6.1.war
     rm -f /$TOMCAT_XNAT_FOLDER_PATH/xnat-web-${XNAT_VERSION}.war
 
 %runscript
+
     # Setting owner and rights
     chown -R postgres:postgres /var/lib/postgresql
     chown -R postgres:postgres /var/run/postgresql
@@ -79,15 +65,16 @@ From: tomcat:9-jdk8-openjdk-bullseye
     su - postgres -c "createdb -O xnat xnat"
     su - postgres -c "psql -c \"ALTER USER xnat WITH PASSWORD 'xnat'\""
 
-    
+    # Starting Postgres
     echo "\nStarting Postgres:"
-    #su postgres /etc/init.d/postgresql start
     service --status-all
 
+    # Starting Tomcat
     echo "\nStarting Tomcat+XNAT:"
     /usr/local/tomcat/bin/catalina.sh run
 
 %startscript
+
     # Setting owner and rights
     chown -R postgres:postgres /var/lib/postgresql
     chown -R postgres:postgres /var/run/postgresql
@@ -104,10 +91,10 @@ From: tomcat:9-jdk8-openjdk-bullseye
     su - postgres -c "createdb -O xnat xnat"
     su - postgres -c "psql -c \"ALTER USER xnat WITH PASSWORD 'xnat'\""
 
-    
+    # Starting Postgres
     echo "\nStarting Postgres:"
-    #su postgres /etc/init.d/postgresql start
     service --status-all
-
+    
+    # Starting Tomcat
     echo "\nStarting Tomcat+XNAT:"
     /usr/local/tomcat/bin/catalina.sh run
