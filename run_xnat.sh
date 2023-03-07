@@ -6,6 +6,12 @@
 #SBATCH --time=0-24:00:00
 #SBATCH -p batch
 
+if ! test -f "xnat-singularity.sif"; then
+    echo "Singularity container needs to be build"
+    singularity build --force --fakeroot xnat-singularity.sif xnat.def
+    echo "Singularity container was built"
+fi
+
 mkdir -p xnat/plugins
 mkdir -p xnat-data/home/logs
 mkdir -p xnat-data/archive 
@@ -16,7 +22,7 @@ mkdir -p postgres/data
 mkdir -p postgres/run
 mkdir -p postgres/config
 
-singularity instance start -f -e --no-home --writable \
+singularity run -f -e --no-home --writable \
 -B postgres/data:/var/lib/postgresql/13/main \
 -B postgres/config:/etc/postgresql/13/main \
 -B xnat/plugins:/data/xnat/home/plugins \

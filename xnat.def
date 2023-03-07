@@ -24,7 +24,7 @@ From: tomcat:9-jdk8-openjdk-bullseye
 
 
 %files
-    xnat-web-1.8.6.1.war /usr/local/tomcat/webapps/xnat-web-1.8.6.1.war
+    # xnat-web-1.8.6.1.war /usr/local/tomcat/webapps/xnat-web-1.8.6.1.war
     xnat/xnat-conf.properties /data/xnat/home/config/xnat-conf.properties
 
 %post    
