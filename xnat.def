@@ -16,6 +16,7 @@ From: tomcat:9-jdk8-openjdk-bullseye
 
     xnat/xnat-conf.properties /data/xnat/home/config/xnat-conf.properties
 
+
 %post    
 
     apt-get update && apt-get install -y postgresql postgresql-contrib wget man nano
@@ -47,6 +48,7 @@ From: tomcat:9-jdk8-openjdk-bullseye
     unzip -q -o -d /$TOMCAT_XNAT_FOLDER_PATH/ROOT /$TOMCAT_XNAT_FOLDER_PATH/xnat-web-1.8.6.1.war
     rm -f /$TOMCAT_XNAT_FOLDER_PATH/xnat-web-${XNAT_VERSION}.war
 
+
 %runscript
 
     # Setting owner and rights
@@ -72,6 +74,7 @@ From: tomcat:9-jdk8-openjdk-bullseye
     # Starting Tomcat
     echo "\nStarting Tomcat+XNAT:"
     /usr/local/tomcat/bin/catalina.sh run
+
 
 %startscript
 
