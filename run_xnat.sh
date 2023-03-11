@@ -6,7 +6,7 @@
 #SBATCH --time=0-24:00:00
 #SBATCH -p batch
 
-module load Utilities/Singularity
+module load tools/Singularity
 
 if ! test -f "xnat-singularity.sif"; then
     echo "Singularity container needs to be build"
